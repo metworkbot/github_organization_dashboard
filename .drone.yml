@@ -1,0 +1,23 @@
+build_common: &build_common
+  commands:
+    - /opt/metwork-mfserv/bin/mfserv_wrapper make release
+
+pipeline:
+  build_integration:
+    <<: *build_common
+    image: metwork/mfservplugins-${OS_VERSION}-buildimage:integration
+    when:
+      event: [push, pull_request]
+      branch: integration
+  build:
+    <<: *build_common
+    image: metwork/mfservplugins-${OS_VERSION}-buildimage:master
+    when:
+      event: push
+      branch: [ master, ci_*, pci_* ]
+
+matrix:
+  OS_VERSION:
+    - centos7
+
+branches: [ master, integration, ci_*, pci_* ]
