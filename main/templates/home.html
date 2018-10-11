@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/dashboard/static/css/bootstrap.min.css">
+
+    <title>MetWork Organization Dashboard</title>
+  </head>
+  <body>
+    <main role="main" class="container">
+    <div>
+    <h1><a href="https://github.com/metwork-framework">MetWork Organization</a> Dashboard</h1>
+    <h2>Branches status</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          {% for BRANCH in BRANCHES %}
+          <th scope="col">Branch: {{BRANCH}}</th>
+          {% endfor %}
+          <th scope="col">Common</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for REPO in REPOS %}
+        <tr>
+          <th scope="row"><a href="{{REPO.url}}">{{REPO.name}}</a></th>
+          {% for B in REPO.branches %}
+              <td>
+              {% if B.sha %}
+                  {% set SHA = B.sha %}
+                  {% if B.drone_status.status == "success" %}
+                      {% set STATUS = "success" %}
+                  {% elif B.drone_status.status == "failure" %}
+                      {% set STATUS = "danger" %}
+                  {% elif B.drone_status.status == "error" %}
+                      {% set STATUS = "danger" %}
+                  {% elif B.drone_status.status == "running" %}
+                      {% set STATUS = "warning" %}
+                  {% elif B.drone_status.status == "pending" %}
+                      {% set STATUS = "secondary" %}
+                  {% else %}
+                      {% set STATUS = "unknown" %}
+                  {% endif %}
+                  {% if STATUS == 'unknown' %}
+                      <a href="{{B.github_link}}">{{SHA}}</a>
+                  {% else %}
+                      <a href="{{B.github_link}}">{{SHA}}</a>&nbsp;<a class="btn btn-{{STATUS}}" href="{{B.drone_status.url}}" role="button">Build: {{B.drone_status.number}}</a>
+                  {% endif %}
+                  {% if B.age < 3600 %}
+                      <span class="badge badge-danger">Very hot</span>
+                  {% elif B.age < 86400 %}
+                      <span class="badge badge-warning">Hot</span>
+                  {% elif B.age < 604800 %}
+                      <span class="badge badge-success">Normal</span>
+                  {% else %}
+                      <span class="badge badge-primary">Cold</span>
+                  {% endif %}
+                  {% if B.name == 'integration' %}
+                      {% if B.sha != REPO.master_sha %}
+                          <span class="badge badge-warning">!= master</span>
+                      {% endif %}
+                  {% endif %}
+              {% else %}
+                  &nbsp;
+              {% endif %}
+              </td>
+          {% endfor %}
+          <td>
+              <a href="https://github.com/metwork-framework/{{REPO.name}}/issues"><img src="https://img.shields.io/github/issues/metwork-framework/{{REPO.name}}.svg"></a>
+              <a href="https://github.com/metwork-framework/{{REPO.name}}/pulls"><img src="https://img.shields.io/github/issues-pr/metwork-framework/{{REPO.name}}.svg"></a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    </main>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="/dashboard/static/js/bootstrap.min.js"></script>
+  </body>
+</html>
